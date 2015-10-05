@@ -15,13 +15,15 @@ class File extends AdapterBase
         parent::__construct($renderer, array_replace_recursive([
             'outputDirectory' => './cache/views',
             'extension' => '.phtml',
-            'lifeTime' => 3600
+            'lifeTime' => 3600,
+            'directoryMode' => 0775,
+            'fileMode' => 0775
         ], $options ? $options : []));
 
         $dir = $this->getOption('outputDirectory');
         if (!is_dir($dir)) {
 
-            @mkdir($dir, 0775, true);
+            @mkdir($dir, $this->getOption('directoryMode'), true);
 
             if (!is_dir($dir))
                 throw new \Exception("Failed to create output directory $dir");
@@ -60,7 +62,7 @@ class File extends AdapterBase
 
             if (!is_dir($dir)) {
 
-                @mkdir($dir, 0775, true);
+                @mkdir($dir, $this->getOption('directoryMode'), true);
 
                 if (!is_dir($dir))
                     throw new \Exception(
@@ -69,6 +71,7 @@ class File extends AdapterBase
             }
 
             file_put_contents($outputPath, $this->getRenderer()->compileFile($path));
+            chmod($outputPath, $this->getOption('fileMode'));
         }
 
         return $render($outputPath, $args ? $args : []);
